@@ -2,7 +2,7 @@
 
 Это база для всего курса. Каждый следующий модуль будет **добавлять** файлы в этот же проект, а не начинать новый.
 
-Весь код в файлах подробно прокомментирован. Эта инструкция объясняет, **зачем** нужен каждый файл и **какие новые конструкции Python** в нём встречаются. Комментарии внутри кода объясняют каждую строку.
+В коде у каждого класса и метода короткий комментарий: зачем он нужен. Эта инструкция объясняет, **зачем** нужен каждый файл и **какие новые конструкции Python** в нём встречаются — держи её открытой рядом с кодом.
 
 ---
 
@@ -171,7 +171,9 @@ uv sync
 
 3. **`@dataclass`** — **декоратор**. Строка с `@` над классом «дописывает» в него код. Ты объявляешь только поля (`name: str`), а конструктор, `toString` (в Python `__repr__`) и `equals` (`__eq__`) появляются автоматически. **Это прямой аналог Lombok `@Data` или Java `record`.**
    ```python
-   model = ModelInfo(name="qwen3.5:4b", size_bytes=3400000000, parameter_size="4.7B", quantization="Q4_K_M")
+   model = ModelInfo(
+       name="qwen3.5:4b", size_bytes=3400000000, parameter_size="4.7B", quantization="Q4_K_M"
+   )
    # Java: new ModelInfo("qwen3.5:4b", 3400000000L, "4.7B", "Q4_K_M");  — слова new в Python нет
    ```
 
@@ -200,8 +202,8 @@ uv sync
     ```python
     try:
         response = requests.get(url, timeout=10)
-    except requests.exceptions.ConnectionError as e:     # catch (ConnectException e)
-        raise OllamaUnavailableError("...") from e       # throw new ...Exception("...", e)
+    except requests.exceptions.ConnectionError as e:  # catch (ConnectException e)
+        raise OllamaUnavailableError("...") from e  # throw new ...Exception("...", e)
     ```
     `from e` сохраняет исходную ошибку как **причину**, это как `cause` в Java.
 
