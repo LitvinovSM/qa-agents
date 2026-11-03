@@ -7,7 +7,8 @@ description = "Интенсив: ИИ-агенты для разбора упа�
 requires-python = ">=3.11"
 # Рабочие зависимости (scope compile в Maven).
 dependencies = [
-    "requests==2.34.2",
+    "requests>=2.31",
+    "pydantic>=2.7",
 ]
 
 [dependency-groups]

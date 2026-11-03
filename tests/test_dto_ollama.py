@@ -1,6 +1,6 @@
 """Тесты разбора JSON в DTO. В Ollama не ходят, поэтому проходят без неё."""
 
-from qa_agents.ollama_client import ChatResult, ModelInfo, RunningModel
+from qa_agents.dto.ollama import ChatResult, ModelInfo, RunningModel
 
 
 def test_model_info_from_api():

@@ -9,8 +9,9 @@
 
 import sys
 
+from qa_agents.clients.ollama_client import OllamaClient
 from qa_agents.config import GPU_VRAM_GB
-from qa_agents.ollama_client import OllamaClient, OllamaUnavailableError
+from qa_agents.errors import OllamaUnavailableError
 from qa_agents.vram import estimate_gb, fits
 
 # Сколько бит в среднем занимает одно число при каждом виде сжатия (приблизительно).

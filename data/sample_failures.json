@@ -1,0 +1,50 @@
+[
+  {
+    "id": "F01",
+    "test_name": "PaymentApiTest.payByCard",
+    "failure_text": "java.net.UnknownHostException: payments-stub.test.local: Name or service not known\n\tat java.base/java.net.InetAddress.getAllByName0(InetAddress.java:1532)\n\tat io.restassured.internal.RequestSpecificationImpl.post(RequestSpecificationImpl.groovy)",
+    "expected": "environment"
+  },
+  {
+    "id": "F02",
+    "test_name": "TransferEventsTest.eventIsPublished",
+    "failure_text": "org.apache.kafka.common.errors.TimeoutException: Topic transfers.events not present in metadata after 60000 ms.",
+    "expected": "environment"
+  },
+  {
+    "id": "F03",
+    "test_name": "TransferApiTest.currencyIsPreserved",
+    "failure_text": "org.opentest4j.AssertionFailedError: Поле currency в ответе POST /api/transfers ==> expected: <RUB> but was: <USD>\n\tat TransferApiTest.currencyIsPreserved(TransferApiTest.java:58)",
+    "expected": "product_bug"
+  },
+  {
+    "id": "F04",
+    "test_name": "CommissionApiTest.zeroAmount",
+    "failure_text": "java.lang.AssertionError: Expected status code <201> but was <500>.\nResponse body: {\"message\": \"Internal error: java.lang.ArithmeticException: / by zero at CommissionCalculator.calc(CommissionCalculator.java:41)\"}",
+    "expected": "product_bug"
+  },
+  {
+    "id": "F05",
+    "test_name": "PaymentUiTest.payButton",
+    "failure_text": "org.openqa.selenium.ElementClickInterceptedException: element click intercepted: Element <button id=\"pay\"> is not clickable at point (512, 640). Other element would receive the click: <div class=\"spinner\">",
+    "expected": "flaky"
+  },
+  {
+    "id": "F06",
+    "test_name": "NotificationKafkaTest.threeEventsSent",
+    "failure_text": "java.lang.AssertionError: Expected 3 events in topic notifications.out but found 2 (consumer polled 150 ms after send)\n\tat NotificationKafkaTest.threeEventsSent(NotificationKafkaTest.java:77)",
+    "expected": "flaky"
+  },
+  {
+    "id": "F07",
+    "test_name": "ClientCardTest.openClientCard",
+    "failure_text": "org.opentest4j.AssertionFailedError: Клиент 7701 не найден: GET /api/clients/7701 вернул 404. Клиент должен создаваться скриптом init-test-data.sql",
+    "expected": "test_data"
+  },
+  {
+    "id": "F08",
+    "test_name": "CardIssueTest.issueVirtualCard",
+    "failure_text": "org.postgresql.util.PSQLException: ERROR: duplicate key value violates unique constraint \"cards_pan_key\"\n  Detail: Key (pan)=(2200000000000004) already exists.\n\tat TestDataFactory.createCard(TestDataFactory.java:112)",
+    "expected": "test_data"
+  }
+]

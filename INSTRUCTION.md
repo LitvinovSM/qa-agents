@@ -17,15 +17,32 @@ qa-agents/
 │   └── qa_agents/              ← НАШ ПАКЕТ (общий код, его импортируют скрипты)
 │       ├── __init__.py         ← делает папку пакетом
 │       ├── config.py           ← все настройки в одном месте
-│       ├── ollama_client.py    ← HTTP-клиент к Ollama (DTO + методы)
+│       ├── errors.py           ← все исключения проекта
+│       ├── dto/                ← только данные (DTO), без логики
+│       │   ├── ollama.py           ModelInfo, RunningModel, ChatResult
+│       │   └── classification.py   FailureClassification (Pydantic)
+│       ├── clients/            ← HTTP-клиенты внешних систем
+│       │   └── ollama_client.py    OllamaClient
+│       ├── prompts/            ← тексты промптов и few-shot примеры
+│       │   └── classifier_prompt.py
+│       ├── services/           ← логика: клиент + DTO + промпт
+│       │   └── classifier.py       classify_failure()
 │       └── vram.py             ← ЗАДАНИЕ 2: две функции пишешь ты
-├── scripts/                    ← скрипты, которые запускаем руками
-│   ├── check_ollama.py         ← ЗАДАНИЕ 1: проверка Ollama (готов, разбираешь)
-│   └── vram_fit.py             ← ЗАДАНИЕ 2: сравнение расчёта с реальностью
+├── data/
+│   └── sample_failures.json    ← учебные падения с ожидаемым классом
+├── scripts/                    ← точки запуска: только импортируют и вызывают
+│   ├── check_ollama.py
+│   ├── vram_fit.py
+│   ├── raw_chat.py
+│   ├── chat_demo.py
+│   └── classify_failures.py
 └── tests/                      ← тесты pytest
-    ├── test_ollama_client.py   ← тесты DTO (зелёные сразу)
-    └── test_vram.py            ← тесты к заданию 2 (красные, пока не допишешь)
+    ├── test_dto_ollama.py      ← тесты DTO Ollama
+    ├── test_classifier.py      ← тесты классификатора (с заглушкой вместо модели)
+    └── test_vram.py            ← тесты к заданию 2
 ```
+
+Слои как в Spring-проекте: `dto` → `clients` → `services` → `scripts`. Каждый слой импортирует только нижние, а `scripts` — это `main`-классы, которые ничего не объявляют, только вызывают.
 
 **Аналогия с Maven-проектом:**
 
@@ -115,7 +132,7 @@ uv sync
 | Python | Java |
 |---|---|
 | пакет `qa_agents` (папка с `__init__.py`) | пакет `ru.qa.agents` |
-| модуль `ollama_client.py` (файл) | класс-файл, но в одном модуле может быть **несколько** классов и функций |
+| модуль `clients/ollama_client.py` (файл) | класс-файл, но в одном модуле может быть **несколько** классов и функций |
 | `from qa_agents.config import DEFAULT_MODEL` | `import static ru.qa.agents.Config.DEFAULT_MODEL;` |
 
 Внутри файла только описание пакета (docstring). Код там не нужен.
@@ -142,18 +159,19 @@ uv sync
 
 ---
 
-## Шаг 7. Файл `src/qa_agents/ollama_client.py` — клиент к Ollama
+## Шаг 7. Клиент к Ollama: `dto/ollama.py`, `errors.py`, `clients/ollama_client.py`
 
 **Что делает:** обёртка над HTTP API Ollama, как твой класс-обёртка над RestAssured во фреймворке автотестов. Скрипты не пишут HTTP-запросы сами, они зовут `client.list_models()`.
 
-В файле 4 класса:
+Классы и где они лежат:
 
-| Класс | Роль | Аналог Java |
-|---|---|---|
-| `OllamaUnavailableError` | своё исключение «Ollama недоступна» | `class OllamaUnavailableException extends RuntimeException` |
-| `ModelInfo` | DTO «скачанная модель» (строка из `ollama list`) | DTO с Lombok `@Data` |
-| `RunningModel` | DTO «модель в памяти» (строка из `ollama ps`) | DTO с Lombok `@Data` |
-| `OllamaClient` | клиент с методами-запросами | сервисный класс-клиент |
+| Класс | Файл | Роль | Аналог Java |
+|---|---|---|---|
+| `OllamaUnavailableError` | `errors.py` | своё исключение «Ollama недоступна» | `class OllamaUnavailableException extends RuntimeException` |
+| `ModelInfo` | `dto/ollama.py` | DTO «скачанная модель» (строка из `ollama list`) | DTO с Lombok `@Data` |
+| `RunningModel` | `dto/ollama.py` | DTO «модель в памяти» (строка из `ollama ps`) | DTO с Lombok `@Data` |
+| `ChatResult` | `dto/ollama.py` | DTO ответа модели | DTO с Lombok `@Data` |
+| `OllamaClient` | `clients/ollama_client.py` | клиент с методами-запросами | класс-клиент |
 
 Методы клиента:
 
@@ -266,7 +284,7 @@ Ollama работает, версия: 0.xx.x
 
 ## Шаг 9. Файлы тестов `tests/`
 
-### `tests/test_ollama_client.py` — тесты DTO
+### `tests/test_dto_ollama.py` — тесты DTO
 
 Проверяют, что JSON правильно превращается в `ModelInfo` и `RunningModel`. **В Ollama не ходят**, поэтому проходят без неё. Это аналог юнит-теста десериализации через Jackson.
 

@@ -9,7 +9,8 @@
 
 import sys
 
-from qa_agents.ollama_client import OllamaClient, OllamaUnavailableError
+from qa_agents.clients.ollama_client import OllamaClient
+from qa_agents.errors import OllamaUnavailableError
 
 FAILURE = "Тест упал с java.net.ConnectException: Connection refused (localhost:8080)."
 
