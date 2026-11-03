@@ -12,8 +12,14 @@ OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 DEFAULT_MODEL: str = "qwen3.5:4b"
 FAST_MODEL: str = "qwen3.5:2b"
 
-# Таймаут служебных HTTP-запросов, секунды.
+# Таймаут служебных HTTP-запросов (версия, список моделей), секунды.
 REQUEST_TIMEOUT_SECONDS: int = 10
+
+# Таймаут запроса к модели: генерация на CPU/GPU медленная, первая загрузка модели — тоже.
+CHAT_TIMEOUT_SECONDS: int = 180
+
+# Размер контекстного окна по умолчанию (столько же ставит сама Ollama).
+DEFAULT_NUM_CTX: int = 4096
 
 # Объём видеопамяти GTX 1650 — для задания про VRAM.
 GPU_VRAM_GB: float = 4.0

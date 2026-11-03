@@ -1,16 +1,23 @@
-"""HTTP-клиент к служебному API Ollama.
+"""HTTP-клиент к API Ollama.
 
 Обёртка, как твой клиент над RestAssured во фреймворке автотестов:
-скрипты зовут client.list_models(), а не пишут HTTP-запросы сами.
+скрипты зовут client.chat(...), а не пишут HTTP-запросы сами.
 """
 
 from dataclasses import dataclass
 
 import requests
 
-from qa_agents.config import OLLAMA_BASE_URL, REQUEST_TIMEOUT_SECONDS
+from qa_agents.config import (
+    CHAT_TIMEOUT_SECONDS,
+    DEFAULT_MODEL,
+    DEFAULT_NUM_CTX,
+    OLLAMA_BASE_URL,
+    REQUEST_TIMEOUT_SECONDS,
+)
 
 BYTES_IN_GB = 1024**3
+NANOSECONDS_IN_SECOND = 1_000_000_000
 
 
 class OllamaUnavailableError(Exception):
@@ -81,11 +88,32 @@ class RunningModel:
         )
 
 
-class OllamaClient:
-    """Клиент к Ollama: версия, скачанные модели, модели в памяти.
+@dataclass
+class ChatResult:
+    """DTO ответа модели: текст + сколько токенов прочитано/написано + сколько секунд.
 
-    В Модуле 1.2 сюда добавится chat() — запрос к самой модели.
+    Токены и время — наша «стоимость» запроса при работе с локальной моделью.
     """
+
+    content: str
+    input_tokens: int
+    output_tokens: int
+    seconds: float
+
+    @staticmethod
+    def from_api(data: dict) -> "ChatResult":
+        """Собирает DTO из JSON ответа /api/chat. Время в ответе — в наносекундах."""
+        message = data.get("message", {})
+        return ChatResult(
+            content=message.get("content", ""),
+            input_tokens=data.get("prompt_eval_count", 0),
+            output_tokens=data.get("eval_count", 0),
+            seconds=data.get("total_duration", 0) / NANOSECONDS_IN_SECOND,
+        )
+
+
+class OllamaClient:
+    """Клиент к Ollama: служебные запросы + запрос к самой модели (chat)."""
 
     def __init__(
         self,
@@ -96,14 +124,14 @@ class OllamaClient:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
 
-    def _get(self, path: str) -> dict:
-        """GET-запрос и разбор JSON. Ошибки сети превращает в OllamaUnavailableError.
+    def _send(self, method: str, path: str, payload: dict | None, timeout: int) -> dict:
+        """Отправляет HTTP-запрос и возвращает JSON. Ошибки сети -> OllamaUnavailableError.
 
-        Подчёркивание в имени — «внутренний метод», аналог private.
+        Общий код для GET и POST, чтобы не дублировать обработку ошибок.
         """
         url = f"{self.base_url}{path}"
         try:
-            response = requests.get(url, timeout=self.timeout_seconds)
+            response = requests.request(method, url, json=payload, timeout=timeout)
             response.raise_for_status()
         except requests.exceptions.ConnectionError as e:
             raise OllamaUnavailableError(
@@ -113,9 +141,13 @@ class OllamaClient:
             ) from e
         except requests.exceptions.Timeout as e:
             raise OllamaUnavailableError(
-                f"Ollama не ответила за {self.timeout_seconds} с по адресу {url}"
+                f"Ollama не ответила за {timeout} с по адресу {url}"
             ) from e
         return response.json()
+
+    def _get(self, path: str) -> dict:
+        """GET-запрос к служебному API (короткий таймаут)."""
+        return self._send("GET", path, None, self.timeout_seconds)
 
     def get_version(self) -> str:
         """Версия сервера Ollama (GET /api/version)."""
@@ -137,3 +169,27 @@ class OllamaClient:
         for item in data.get("models", []):
             result.append(RunningModel.from_api(item))
         return result
+
+    def chat(
+        self,
+        messages: list[dict],
+        model: str = DEFAULT_MODEL,
+        temperature: float = 0.0,
+        num_ctx: int = DEFAULT_NUM_CTX,
+    ) -> ChatResult:
+        """Отправляет историю сообщений модели и возвращает её ответ (POST /api/chat).
+
+        По умолчанию: temperature 0 (предсказуемо), режим размышлений выключен (быстро).
+        """
+        payload = {
+            "model": model,
+            "messages": messages,
+            "stream": False,
+            "think": False,
+            "options": {
+                "temperature": temperature,
+                "num_ctx": num_ctx,
+            },
+        }
+        data = self._send("POST", "/api/chat", payload, CHAT_TIMEOUT_SECONDS)
+        return ChatResult.from_api(data)
