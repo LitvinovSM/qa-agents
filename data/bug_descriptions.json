@@ -1,0 +1,35 @@
+[
+  {
+    "id": "B01",
+    "description": "Всем привет! На айфоне, версия 5.13.1, стенд st. Открываю историю операций, листаю вниз до самого конца, и приложение вылетает, просто закрывается. Повторил пять раз, стабильно. В крэшлоге из Xcode вот это: Fatal error: Index out of range at TransactionListViewModel.swift:88",
+    "expected": {
+      "priority": "critical",
+      "stand": "st",
+      "side": "frontend",
+      "app_version": "5.13.1",
+      "has_logs": true
+    }
+  },
+  {
+    "id": "B02",
+    "description": "В вебе выписка по счёту выгружается в PDF, но даты операций там в формате 2026-11-03, а не 03.11.2026. Ничего не ломается, но выглядит странно. Версию и стенд не записал, сорри.",
+    "expected": {
+      "priority": "low",
+      "stand": "unknown",
+      "side": null,
+      "app_version": "<no info>",
+      "has_logs": false
+    }
+  },
+  {
+    "id": "B03",
+    "description": "На проде, бэк 3.4.0, пуши о списании приходят дважды. Сделал платёж на 500 рублей, на телефон прилетело два одинаковых уведомления с разницей в секунду. В логах notification-service: WARN Duplicate event consumed: eventId=7f3a9 partition=2 offset=1045. Сам платёж при этом списался один раз.",
+    "expected": {
+      "priority": "high",
+      "stand": "prod",
+      "side": "backend",
+      "app_version": "3.4.0",
+      "has_logs": true
+    }
+  }
+]

@@ -1,11 +1,6 @@
-"""DTO результата классификации падения (Pydantic = Jackson + Bean Validation)."""
-
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
-# Допустимые классы падения. Literal = «только одно из этих значений», как enum.
-Category = Literal["product_bug", "flaky", "environment", "test_data"]
+from qa_agents.dto.classificator.batchFailureClassificator.batch_item import Category
 
 
 class FailureClassification(BaseModel):

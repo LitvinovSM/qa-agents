@@ -12,7 +12,9 @@ from qa_agents.config import (
     OLLAMA_BASE_URL,
     REQUEST_TIMEOUT_SECONDS,
 )
-from qa_agents.dto.ollama import ChatResult, ModelInfo, RunningModel
+from qa_agents.dto.ollama.chat_result import ChatResult
+from qa_agents.dto.ollama.model_info import ModelInfo
+from qa_agents.dto.ollama.running_model import RunningModel
 from qa_agents.errors import OllamaUnavailableError
 
 
