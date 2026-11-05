@@ -8,7 +8,6 @@ import json
 from pydantic import ValidationError
 
 from qa_agents.clients.ollama_client import OllamaClient
-from qa_agents.dto.classificator.batchFailureClassificator.batch_classification import BatchClassification
 from qa_agents.dto.classificator.failureClassificator.faulure_classificator import FailureClassification
 from qa_agents.errors import ClassificationError
 from qa_agents.prompts.classifier_prompt import FEW_SHOT_EXAMPLES, SYSTEM_PROMPT
@@ -49,27 +48,6 @@ def classify_failure(failure_text: str, client: OllamaClient) -> FailureClassifi
             last_error = e
 
     raise ClassificationError(f"Модель не вернула валидный JSON: {last_error}")
-
-
-def classify_failure_list(failure_list: list[str], client: OllamaClient) -> BatchClassification:
-    """Отправляет падение модели и возвращает проверенный результат.
-
-    Если ответ не прошёл проверку Pydantic — переспрашивает (до MAX_ATTEMPTS раз).
-    """
-    messages = build_messages("\n".join(failure_list))
-    schema = BatchClassification.model_json_schema()
-
-    last_error = None
-    for _ in range(MAX_ATTEMPTS):
-        result = client.chat(messages, response_format=schema)
-        print(f"От модели получили ответ вида: {json.dumps(json.loads(result.content), indent=4, ensure_ascii=False)}")
-        try:
-            return BatchClassification.model_validate_json(result.content)
-        except ValidationError as e:
-            last_error = e
-
-    raise ClassificationError(f"Модель не вернула валидный JSON: {last_error}")
-
 
 
 def evidence_found(classification: FailureClassification, failure_text: str) -> bool:

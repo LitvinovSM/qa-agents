@@ -10,7 +10,7 @@ from pathlib import Path
 
 from qa_agents.clients.ollama_client import OllamaClient
 from qa_agents.errors import ClassificationError, OllamaUnavailableError
-from qa_agents.services.classifier import classify_failure, evidence_found, classify_failure_list
+from qa_agents.services.classifier import classify_failure, evidence_found
 
 # Путь к данным считаем от этого файла, чтобы скрипт работал из любой папки (и из PyCharm).
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -52,30 +52,5 @@ def main() -> int:
     return 0
 
 
-
-def second_main() -> int:
-    """Классифицирует все падения одним списком и печатает итог «совпало X из N»."""
-    failures = json.loads(DATA_FILE.read_text(encoding="utf-8"))
-    client = OllamaClient()
-    correct = 0
-
-    failureList =[]
-    for failure in failures:
-        failure_id_plus_text = f"{failure["id"]}: {failure["failure_text"]}"
-        failureList.append(failure_id_plus_text)
-    try:
-        result = classify_failure_list(failureList, client)
-    except OllamaUnavailableError as e:
-        print("[ОШИБКА]", e)
-        return 1
-    except ClassificationError as e:
-        print("[НЕ РАЗОБРАНО]", e)
-        return 1
-    print("Разбор закончен")
-    print("Модель разобрала список падений и ответила следующим результатом ")
-    print(f"{result}")
-    return 0
-
-
 if __name__ == "__main__":
-    sys.exit(second_main())
+    sys.exit(main())
