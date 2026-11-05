@@ -3,6 +3,9 @@
 Только транспорт: отправить запрос, разобрать ответ в DTO, превратить сетевые ошибки в свои.
 """
 
+import json
+from dataclasses import asdict
+
 import requests
 
 from qa_agents.config import (
@@ -103,3 +106,12 @@ class OllamaClient:
             payload["format"] = response_format
         data = self._send("POST", "/api/chat", payload, CHAT_TIMEOUT_SECONDS)
         return ChatResult.from_api(data)
+
+    def chat_result_as_json(self, chat_result: ChatResult) -> str:
+        return f"{json.dumps(asdict(chat_result), indent=4, ensure_ascii=False)}"
+
+    def chat_content_as_json(self, chat_result: ChatResult) -> str:
+        try:
+            return json.dumps(json.loads(chat_result.content), indent=4, ensure_ascii=False)
+        except json.JSONDecodeError:
+            return chat_result.content
