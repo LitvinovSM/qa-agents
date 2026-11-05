@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from qa_agents.dto.classificator.failureClassificator.faulure_classificator import FailureClassification
-from qa_agents.dto.ollama import ChatResult
+from qa_agents.dto.ollama.chat_result import ChatResult
 from qa_agents.errors import ClassificationError
 from qa_agents.services.classifier import classify_failure, evidence_found
 

@@ -41,7 +41,6 @@ def classify_failure(failure_text: str, client: OllamaClient) -> FailureClassifi
     last_error = None
     for _ in range(MAX_ATTEMPTS):
         result = client.chat(messages, response_format=schema)
-        print(f"От модели получили ответ вида: {json.dumps(json.loads(result.content), indent=4, ensure_ascii=False)}")
         try:
             return FailureClassification.model_validate_json(result.content)
         except ValidationError as e:

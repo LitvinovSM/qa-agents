@@ -40,7 +40,6 @@ def classify_failure_list(failure_list: list[str], client: OllamaClient) -> Chat
     last_error = None
     for _ in range(MAX_ATTEMPTS):
         result = client.chat(messages, response_format=schema)
-        print(f"От модели получили ответ вида: {json.dumps(json.loads(result.content), indent=4, ensure_ascii=False)}")
         try:
             BatchClassification.model_validate_json(result.content)
             return result

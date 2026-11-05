@@ -86,11 +86,13 @@ class OllamaClient:
         temperature: float = 0.0,
         num_ctx: int = DEFAULT_NUM_CTX,
         response_format: dict | None = None,
+        tools: list[dict] | None = None,
     ) -> ChatResult:
         """Отправляет историю сообщений модели и возвращает её ответ (POST /api/chat).
 
         По умолчанию: temperature 0, режим размышлений выключен.
         response_format — JSON Schema: модель обязана ответить JSON-ом ровно такой формы.
+        tools — описания инструментов: модель может попросить вызвать любой из них.
         """
         payload = {
             "model": model,
@@ -104,6 +106,8 @@ class OllamaClient:
         }
         if response_format is not None:
             payload["format"] = response_format
+        if tools is not None:
+            payload["tools"] = tools
         data = self._send("POST", "/api/chat", payload, CHAT_TIMEOUT_SECONDS)
         return ChatResult.from_api(data)
 
